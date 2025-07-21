@@ -1,0 +1,25 @@
+{
+  "name": "domain-hotel",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": "true",
+   "workspaces": [
+    "domain",
+    "apps/backend"
+  ],
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

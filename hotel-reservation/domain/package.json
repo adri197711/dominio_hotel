@@ -1,0 +1,16 @@
+{
+  "name": "hotel-reservation-domain",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
