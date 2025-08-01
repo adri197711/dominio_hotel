@@ -1,23 +1,28 @@
 import { ReservationRepository } from '../repositories/ReservationRepository';
 import { RoomRepository } from '../repositories/RoomRepository';
 
-export class CancelReservation {
-  constructor(
-    private reservationRepository: ReservationRepository,
-    private roomRepository: RoomRepository
-  ) {}
+export interface CancelReservationDependencies {
+  reservationRepository: ReservationRepository;
+  roomRepository: RoomRepository;
+}
 
-  async execute(reservationId: string): Promise<void> {
-    const reservation = await this.reservationRepository.findById(reservationId);
-    if (!reservation) throw new Error('Reservation not found.');
+export interface CancelReservationRequestModel {
+  reservationId: string;
+}
 
-    reservation.status = 'cancelled';
-    await this.reservationRepository.update(reservation);
+export async function CancelReservation(
+  { reservationRepository, roomRepository }: CancelReservationDependencies,
+  { reservationId }: CancelReservationRequestModel
+): Promise<void> {
+  const reservation = await reservationRepository.findById(reservationId);
+  if (!reservation) throw new Error('Reservation not found.');
 
-    const room = await this.roomRepository.findById(reservation.roomId);
-    if (room) {
-      room.status = 'available';
-      await this.roomRepository.save(room);
-    }
+  reservation.status = 'cancelled';
+  await reservationRepository.update(reservation);
+
+  const room = await roomRepository.findById(reservation.roomId);
+  if (room) {
+    room.status = 'available';
+    await roomRepository.save(room);
   }
 }

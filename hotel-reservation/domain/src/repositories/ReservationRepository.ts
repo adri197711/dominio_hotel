@@ -1,4 +1,4 @@
-import { Reservation } from '../../entities/Reservation';
+import { Reservation } from '../entities/Reservation';
 
 export interface ReservationRepository {
   findById(id: string): Promise<Reservation | null>;
