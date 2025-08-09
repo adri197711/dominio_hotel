@@ -4,4 +4,6 @@ export interface RoomRepository {
   findById(id: string): Promise<Room | null>;
   getAll(): Promise<Room[]>;
   save(room: Room): Promise<void>;
+  update(room: Room): Promise<void>;
+  delete(id: string): Promise<void>;
 }

@@ -1,6 +1,7 @@
-import { Reservation } from '../entities/Reservation';
-import { ReservationRepository } from '../repositories/ReservationRepository';
-import { RoomRepository } from '../repositories/RoomRepository';
+import { Reservation } from '../../entities/Reservation';
+import { ReservationRepository } from '../../repositories/ReservationRepository';
+import { RoomRepository } from '../../repositories/RoomRepository';
+import { ChangeRoomStatus } from '../room';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateReservationDependencies {
@@ -19,6 +20,7 @@ export async function CreateReservation(
   { reservationRepository, roomRepository }: CreateReservationDependencies,
   { userId, roomId, checkInDate, checkOutDate }: CreateReservationRequestModel
 ): Promise<Reservation> {
+
   const room = await roomRepository.findById(roomId);
   if (!room) {
     throw new Error('Room not found.');
@@ -39,8 +41,7 @@ export async function CreateReservation(
 
   await reservationRepository.save(reservation);
 
-  room.status = 'booked';
-  await roomRepository.save(room);
-
+  await ChangeRoomStatus({ roomRepository }, { id: roomId, status: 'booked' });
+ 
   return reservation;
 }

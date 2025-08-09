@@ -1,79 +1,142 @@
-import { describe, it, expect } from 'vitest';
-import { UserRegister } from '../src/use-cases/RegisterUser';
+import { describe, test, expect, beforeEach } from 'vitest';
+import { User, UserRole } from '../src/entities/User';
+import { UserRegisterRequestModel, UserRegister, UserRegisterDependencies } from '../src/use-cases/user/RegisterUser';
 import { createInMemoryUserRepository } from '../src/mocks/InMemoryUserRepository';
 
-describe('UserRegister', () => {
-  it('should register a new user successfully', async () => {
-    const userRepo = createInMemoryUserRepository();
+describe('UserRegister Use Case', () => {
+  let userRepo: ReturnType<typeof createInMemoryUserRepository>;
+  let dependencies: UserRegisterDependencies;
 
-    const result = await UserRegister(
-      { users: userRepo },
-      { name: 'Alice', email: 'alice@example.com', password: 'securepass' }
-    );
+  const existingUser: User = {
+    id: 'existing-user-id',
+    password: 'hashedpassword',
+    email: 'existing@user.com',
+    name: 'Existing User',
+    role: 'user' as UserRole,
+  };
 
-    expect(result).toBeUndefined(); 
-
-    const storedUser = await userRepo.findByEmail('alice@example.com');
-    expect(storedUser).not.toBeNull();
-    expect(storedUser?.name).toBe('Alice');
+  beforeEach(async () => {
+    userRepo = createInMemoryUserRepository();
+    dependencies = { users: userRepo };
+    await userRepo.register(existingUser); // Usamos register para agregar usuario inicial
   });
 
-  it('should not allow registering with duplicate email', async () => {
-    const userRepo = createInMemoryUserRepository();
+  test('should return error if email format is invalid', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'invalid-email-format',
+      password: '12345678',
+      name: 'Test User',
+    };
 
-    // Register first user
-    await UserRegister(
-      { users: userRepo },
-      { name: 'Bob', email: 'bob@example.com', password: 'mypassword' }
-    );
+    const result = await UserRegister(dependencies, payload);
 
-    // Try to register with same email
-    const result = await UserRegister(
-      { users: userRepo },
-      { name: 'Bobby', email: 'bob@example.com', password: 'anotherpass' }
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({ message: 'Email already in use' })
-    );
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Invalid email format',
+    });
   });
 
-  it('should return error if email is empty', async () => {
-    const userRepo = createInMemoryUserRepository();
+  test('should return error if password is less than 6 characters', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'valid@email.com',
+      password: '12345',
+      name: 'Test User',
+    };
 
-    const result = await UserRegister(
-      { users: userRepo },
-      { name: 'EmptyEmail', email: '', password: '123456' }
-    );
+    const result = await UserRegister(dependencies, payload);
 
-    expect(result).toEqual(
-      expect.objectContaining({ message: 'Email must not be empty' })
-    );
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Password must be at least 6 characters',
+    });
+  });
+  test('should return error if name is only whitespace', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'valid@email.com',
+      password: '12345678',
+      name: '   ',
+    };
+
+    const result = await UserRegister(dependencies, payload);
+
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Name must not be empty',
+    });
   });
 
-  it('should return error if password is empty', async () => {
-    const userRepo = createInMemoryUserRepository();
+  test('should fail if email is already in use', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'existing@user.com',
+      password: '12345678',
+      name: 'Test User',
+    };
 
-    const result = await UserRegister(
-      { users: userRepo },
-      { name: 'NoPass', email: 'nopass@example.com', password: '' }
-    );
+    const result = await UserRegister(dependencies, payload);
 
-    expect(result).toEqual(
-      expect.objectContaining({ message: 'Password must not be empty' })
-    );
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Email already in use',
+    });
   });
 
-  it('should return error if name is empty', async () => {
-    const userRepo = createInMemoryUserRepository();
+  test('should return error if email is empty', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: '',
+      password: '12345678',
+      name: 'Test User',
+    };
 
-    const result = await UserRegister(
-      { users: userRepo },
-      { name: '', email: 'noname@example.com', password: 'pass123' }
-    );
+    const result = await UserRegister(dependencies, payload);
 
-    expect(result).toEqual(
-      expect.objectContaining({ message: 'Name must not be empty' })
-    );
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Email must not be empty',
+    });
+  });
+
+  test('should return error if password is empty', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'valid@email.com',
+      password: '',
+      name: 'Test User',
+    };
+
+    const result = await UserRegister(dependencies, payload);
+
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Password must not be empty',
+    });
+  });
+
+  test('should return error if name is empty', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'valid@email.com',
+      password: '12345678',
+      name: '',
+    };
+
+    const result = await UserRegister(dependencies, payload);
+
+    expect(result).toMatchObject({
+      type: 'InvalidData',
+      message: 'Name must not be empty',
+    });
+  });
+
+  test('should register successfully with valid data', async () => {
+    const payload: UserRegisterRequestModel = {
+      email: 'valid@email.com',
+      password: '12345678',
+      name: 'User Test',
+    };
+
+    const result = await UserRegister(dependencies, payload);
+    const user = await userRepo.findByEmail(payload.email);
+
+    expect(result).toBeUndefined();
+    expect(user).not.toBeNull();
+    expect(user?.email).toBe(payload.email);
   });
 });

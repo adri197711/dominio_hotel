@@ -5,6 +5,7 @@ export const createInMemoryRoomRepository = (): RoomRepository => {
   let rooms: Room[] = [];
 
   return {
+
     findById(id: string): Promise<Room | null> {
       const result = rooms.find(room => room.id === id) ?? null;
       return Promise.resolve(result);
@@ -21,6 +22,19 @@ export const createInMemoryRoomRepository = (): RoomRepository => {
       } else {
         rooms.push(room);
       }
+      return Promise.resolve();
+    },
+        update(room: Room): Promise<void> {
+      const index = rooms.findIndex(r => r.id === room.id);
+      if (index === -1) {
+        return Promise.reject(new Error('Room not found for update.'));
+      }
+      rooms[index] = room;
+      return Promise.resolve();
+    },
+
+    delete(id: string): Promise<void> {
+      rooms = rooms.filter(room => room.id !== id);
       return Promise.resolve();
     }
   };

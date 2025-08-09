@@ -26,6 +26,11 @@ export const createInMemoryReservationRepository = (): ReservationRepository => 
     },
 
     update(reservation: Reservation): Promise<void> {
+      const exists = reservations.some(r => r.id === reservation.id);
+      if (!exists) {
+        return Promise.reject(new Error('Reservation not found for update.'));
+      }
+      // Reusar el método save para actualizar
       return this.save(reservation);
     },
 

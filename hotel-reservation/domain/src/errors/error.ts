@@ -16,7 +16,7 @@ export const createInvalidDataError = (_message: string): InvalidDataError => ({
     httpStatus: 400
 });
 
-export const createNotFoundError = (): AppError => ({
+export const createNotFoundError = (p0: string): AppError => ({
     type: 'Not Found',
     message: "404 Not Found",
     httpStatus: 404
