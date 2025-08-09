@@ -2,9 +2,11 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { User, UserRole } from '../src/entities/User';
 import { UserRegisterRequestModel, UserRegister, UserRegisterDependencies } from '../src/use-cases/user/RegisterUser';
 import { createInMemoryUserRepository } from '../src/mocks/InMemoryUserRepository';
+import { CryptoRepository } from '../src/repositories/CryptoRepository';
 
 describe('UserRegister Use Case', () => {
   let userRepo: ReturnType<typeof createInMemoryUserRepository>;
+    let cryptoRepo: CryptoRepository;
   let dependencies: UserRegisterDependencies;
 
   const existingUser: User = {
@@ -17,8 +19,18 @@ describe('UserRegister Use Case', () => {
 
   beforeEach(async () => {
     userRepo = createInMemoryUserRepository();
-    dependencies = { users: userRepo };
-    await userRepo.register(existingUser); // Usamos register para agregar usuario inicial
+
+    cryptoRepo = {
+      hashPassword: async (password: string) => `hashed-${password}`,
+      comparePassword: async () => true,
+      generateJWT: async () => 'fake-jwt',
+      validateToken: async () => existingUser,
+      generateRandomToken: async () => 'generated-id',
+    };
+
+    dependencies = { users: userRepo, crypto: cryptoRepo };
+
+    await userRepo.register(existingUser); // register para agregar usuario inicial
   });
 
   test('should return error if email format is invalid', async () => {

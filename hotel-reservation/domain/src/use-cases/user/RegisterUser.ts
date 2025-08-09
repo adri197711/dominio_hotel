@@ -1,17 +1,17 @@
 import { User } from "../../entities/User";
 import { createInvalidDataError, InvalidDataError } from "../../errors/error";
 import { UserRepository } from "../../repositories/UserRepository"
-import bcrypt from "bcrypt";
-import crypto from "node:crypto";
+import { CryptoRepository } from "../../repositories/CryptoRepository";
 
 export interface UserRegisterDependencies {
     users: UserRepository;
+    crypto: CryptoRepository;
 }
 
 export type UserRegisterRequestModel = Omit<User, 'id' | 'role'>;
 
 export async function UserRegister(
-    { users }: UserRegisterDependencies,
+    { users, crypto }: UserRegisterDependencies,
     { email, password, name }: UserRegisterRequestModel
 ): Promise<InvalidDataError | void> {
 
@@ -21,10 +21,11 @@ export async function UserRegister(
     const existingUser = await users.findByEmail(email);
     if (existingUser) return createInvalidDataError("Email already in use");
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    const hashedPassword = await crypto.hashPassword(password);
+    const generatedId = await crypto.generateRandomToken();
+   
     const user: User = {
-        id: crypto.randomUUID(),
+        id: generatedId,
         email,
         password: hashedPassword,
         name,
