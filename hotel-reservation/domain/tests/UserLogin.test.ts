@@ -4,7 +4,7 @@ import { UserLogin, UserLoginDependencies, UserLoginRequestModel } from '../src/
 describe('login', () => {
   let users: { findByEmail: (email: string) => Promise<any | null> };
   let crypto: {
-    comparePasswords: (plain: string, hashed: string) => Promise<boolean>;
+    comparePassword: (plain: string, hashed: string) => Promise<boolean>;
   };
   let tokens: {
     generateToken: (payload: any) => Promise<string>;
@@ -16,7 +16,7 @@ describe('login', () => {
       findByEmail: vi.fn(),
     };
     crypto = {
-      comparePasswords: vi.fn(),
+      comparePassword: vi.fn(),
     };
     tokens = {
       generateToken: vi.fn(),
@@ -25,9 +25,15 @@ describe('login', () => {
   });
 
   test('debería retornar token si el login es exitoso', async () => {
-    const user = { id: 'user-1', email: 'test@example.com', password: 'hashed-password', role: 'guest', name: 'Test User' };
+    const user = {
+      id: 'user-1',
+      email: 'test@example.com',
+      password: 'hashed-password',
+      role: 'guest',
+      name: 'Test User',
+    };
     (users.findByEmail as any).mockResolvedValue(user);
-    (crypto.comparePasswords as any).mockResolvedValue(true);
+    (crypto.comparePassword as any).mockResolvedValue(true);
     (tokens.generateToken as any).mockResolvedValue('jwt-token');
 
     const request: UserLoginRequestModel = {
@@ -38,7 +44,7 @@ describe('login', () => {
     const result = await UserLogin(dependencies, request);
 
     expect(users.findByEmail).toHaveBeenCalledWith('test@example.com');
-    expect(crypto.comparePasswords).toHaveBeenCalledWith('correct-password', 'hashed-password');
+    expect(crypto.comparePassword).toHaveBeenCalledWith('correct-password', 'hashed-password');
     expect(tokens.generateToken).toHaveBeenCalledWith({ id: 'user-1', role: 'guest' });
     expect(result).toEqual({
       token: 'jwt-token',
@@ -54,7 +60,7 @@ describe('login', () => {
   test('debería lanzar error si la contraseña es inválida', async () => {
     const user = { id: 'user-1', password: 'hashed-password', role: 'guest' };
     (users.findByEmail as any).mockResolvedValue(user);
-    (crypto.comparePasswords as any).mockResolvedValue(false);
+    (crypto.comparePassword as any).mockResolvedValue(false);
 
     const request: UserLoginRequestModel = {
       email: 'test@example.com',
@@ -63,7 +69,7 @@ describe('login', () => {
 
     await expect(UserLogin(dependencies, request)).rejects.toThrow('Invalid email or password');
     expect(users.findByEmail).toHaveBeenCalledWith('test@example.com');
-    expect(crypto.comparePasswords).toHaveBeenCalledWith('wrong-password', 'hashed-password');
+    expect(crypto.comparePassword).toHaveBeenCalledWith('wrong-password', 'hashed-password');
   });
 
   test('debería lanzar error si el usuario no existe', async () => {

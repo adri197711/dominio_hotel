@@ -1,8 +1,11 @@
 import { Model, DataTypes } from 'sequelize';
+import connection from '../connection';
+import Rol from './rol';
 
 class User extends Model {
   public id!: number;
   public name!: string;
+  public surname!: string;
   public email!: string;
   public password!: string;
   public image?: string;
@@ -29,7 +32,10 @@ User.init(
       allowNull: false,
       type: DataTypes.STRING,
     },
-   
+    surname: {
+      allowNull: false,
+      type: DataTypes.STRING,
+    },
     email: {
       allowNull: false,
       unique: true,

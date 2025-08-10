@@ -1,31 +1,162 @@
-import { Request, Response } from 'express';
-import { UserRegister, UserRegisterDependencies, UserRegisterRequestModel } from '../services/UserRegister';
-import { createInMemoryUserRepository } from '../database/ImMemoryUserRepository';
+import { UserRegister, UserRegisterRequestModel } from "../../../../domain/src/use-cases/user/RegisterUser";
+import { findUserById } from "../../../../domain/src/use-cases/user/FindUserById";
+import { updateUser } from "../../../../domain/src/use-cases/user/UpdateUser";
+import { deleteUser } from "../../../../domain/src/use-cases/user/DeleteUser";
+import { Request, Response } from "express";
+import { cryptoService } from "../services/crypto.service";
+import { userService } from "../services/user.service";
+import { 
+     createInvalidDataError, createInternalServerError } from "../../../../domain/src/errors/error";
 
-const crypto = {
-  async hashPassword(p: string) { return `hashed-${p}`; },
-  async generateRandomToken() { return Math.random().toString(36).slice(2); },
-};
+export function userController() {
+    return {
+       
+        registerNewUser: async (req: Request, res: Response) => {
+            try {
+                const {email, password, name } : UserRegisterRequestModel = req.body;
+                const user = await UserRegister(
+                    {
+                        users: userService(), 
+                        crypto: cryptoService()
+                    },
+                    {email, password, name });
 
-const users = createInMemoryUserRepository();
-const dependencies: UserRegisterDependencies = { users, crypto };
+                return res.status(200).json({
+                    ok: true,
+                    data: user,
+                    message: "Usuario registrado con éxito"
+                });
+            } catch (e) {                
+                const error =
+                    e instanceof 
+                    Error
+                        ? e
+                        : createInternalServerError(
+                            "Ups, hubo un error al registrar el usuario"
+                        );
+                return res.status(error.message).json({
+                    ok: false,
+                    message: error.message,
+                });
+            }
+        },
+         
 
-export async function registerUserController(req: Request, res: Response) {
-  const { email, password, name } = req.body as UserRegisterRequestModel;
+        // Get user data
+        findById: async (req: Request, res: Response) => {
+            try {
+                const {id} = req.params;
+                const user = await findUserById({userRepository: userService()}, {id});
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters' });
-  }
+                return res.status(200).json({
+                    ok: true,
+                    data: user,
+                    message: "Perfil de usuario"
+                });
+            } catch (e) {                
+                const error =
+                    e instanceof Error
+                        ? e
+                        : createInternalServerError(
+                            "Ups, hubo un error al obtener el perfil de usuario"
+                        );
+                return res.status(error.message).json({
+                    ok: false,
+                    message: error.message,
+                });
+            }
+        },
+        // Get all users
+        getAllUsers: async (req: Request, res: Response) => {
+            try {
+                const users = await userService().getAll();
+                return res.status(200).json({
+                    ok: true,
+                    data: users.map(user => {
+                        return {
+                            ...user,
+                            url : `${req.protocol}://${req.get('host')}/users/${user.id}`
+                        }
+                    }),
+                    message: "Lista de usuarios"
+                });
+            } catch (e) {
+                const error =
+                    e instanceof 
+                    Error
+                        ? e
+                        : createInternalServerError(
+                            "Ups, hubo un error al obtener la lista de usuarios"
+                        );
+                return res.status(error.message).json({
+                    ok: false,
+                    message: error.message,
+                });
+            }
+        },
+         getUserById: async (req: Request, res: Response) => {
+            try {
+                const { id } = req.params;
+                const user = await findUserById(
+                    { userRepository: userService() },
+                    { id }
+                );
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email must not be empty' });
-  }
+                if (!user) {
+                    return res.status(404).json({ ok: false, message: "Usuario no encontrado" });
+                }
 
-  const result = await UserRegister(dependencies, { email, password, name });
+                return res.status(200).json({ ok: true, data: user });
+            } catch (e) {
+                const error =
+                    e instanceof 
+                    Error
+                        ? e
+                        : createInternalServerError("Error al obtener usuario");
+                return res.status(error.message).json({ ok: false, message: error.message });
+            }
+        },
 
-  if (result) {
-    return res.status(400).json({ error: result.message });
-  }
+        updateUser: async (req: Request, res: Response) => {
+            try {
+                const { id } = req.params;
+                const updatedUser = await updateUser(
+                    { userRepository: userService() },
+                    { id, ...req.body }
+                );
 
-  res.status(201).json({ message: 'User registered successfully' });
+                return res.status(200).json({
+                    ok: true,
+                    data: updatedUser,
+                    message: "Usuario actualizado con éxito"
+                });
+            } catch (e) {
+                const error =
+                    e instanceof 
+                    Error
+                        ? e
+                        : createInternalServerError("Error al actualizar usuario");
+                return res.status(error.message).json({ ok: false, message: error.message });
+            }
+        },
+
+   
+        deleteUser: async (req: Request, res: Response) => {
+            try {
+                const { id } = req.params;
+                await deleteUser({ userRepository: userService() }, { id });
+
+                return res.status(200).json({
+                    ok: true,
+                    message: "Usuario eliminado con éxito"
+                });
+            } catch (e) {
+                const error =
+                    e instanceof Error
+                        ? e
+                        : createInternalServerError("Error al eliminar usuario");
+                return res.status(error.message).json({ ok: false, message: error.message });
+            }
+        }
+    };
 }

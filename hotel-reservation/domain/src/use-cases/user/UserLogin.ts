@@ -2,12 +2,12 @@ import { User } from "../../entities/User";
 import { createInvalidDataError, InvalidDataError } from "../../errors/error";
 import { UserRepository } from "../../repositories/UserRepository";
 import { CryptoRepository } from "../../repositories/CryptoRepository";
-import { TokenRepository } from "../../repositories/TokenRepository";
+import { VerificationTokenRepository } from "../../repositories/verification-token-repository";
 
 export interface UserLoginDependencies {
     users: UserRepository;
     crypto: CryptoRepository;
-    tokens: TokenRepository; // Para generar JWT u otro tipo de token
+    tokens: VerificationTokenRepository; // Para generar JWT u otro tipo de token
 }
 
 export type UserLoginRequestModel = {
@@ -31,7 +31,7 @@ validateLoginData(email, password);
       throw createInvalidDataError("Invalid email or password");
     }
 
-    const isPasswordValid = await crypto.comparePasswords(password, existingUser.password);
+    const isPasswordValid = await crypto.comparePassword(password, existingUser.password);
     if (!isPasswordValid) {
     throw createInvalidDataError("Invalid email or password");
     }

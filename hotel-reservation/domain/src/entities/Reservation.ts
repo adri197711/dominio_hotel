@@ -1,4 +1,4 @@
-export type ReservationStatus = 'pending' | 'completed' | 'cancelled';
+export type ReservationStatus = 'pending' | 'completed' | 'cancelled' | 'available';
 
 export interface Reservation {
   id: string;
@@ -6,5 +6,6 @@ export interface Reservation {
   roomId: string;
   checkInDate: Date;
   checkOutDate: Date;
+  totalPrice?: number;
   status: ReservationStatus;
 }

@@ -30,7 +30,7 @@ describe('deleteUser', () => {
   test('debe lanzar error si el usuario no existe', async () => {
     (userRepository.findById as any).mockResolvedValue(null);
 
-    await expect(deleteUser(dependencies, { id: 'non-existent-id' })).rejects.toThrow('404 Not Found');
+    await expect(deleteUser(dependencies, { id: 'non-existent-id' })).rejects.toThrow('User not found');
 
     expect(userRepository.findById).toHaveBeenCalledWith('non-existent-id');
     expect(userRepository.delete).not.toHaveBeenCalled();
