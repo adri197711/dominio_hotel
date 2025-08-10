@@ -1,34 +1,65 @@
-import { CryptoRepository } from "../../repositories/CryptoRepository";
-import { createUnauthorizedError, UnauthorizedError } from "../../errors/error";
+import { User } from "../../entities/User";
+import { createInvalidDataError, InvalidDataError } from "../../errors/error";
 import { UserRepository } from "../../repositories/UserRepository";
+import { CryptoRepository } from "../../repositories/CryptoRepository";
+import { TokenRepository } from "../../repositories/TokenRepository";
 
 export interface UserLoginDependencies {
-  userRepository: UserRepository;
-  cryptoRepository : CryptoRepository
+    users: UserRepository;
+    crypto: CryptoRepository;
+    tokens: TokenRepository; // Para generar JWT u otro tipo de token
 }
 
-export interface UserLoginRequestModel {
-  email: string;
-  password: string;
-}
+export type UserLoginRequestModel = {
+    email: string;
+    password: string;
+};
 
-export interface UserLoginResponseModel {
-  token : string
-}
+export type UserLoginResponseModel = {
+    token: string;
+    user: Omit<User, "password">;
+};
 
-export async function login(
-  { userRepository, cryptoRepository }: UserLoginDependencies,
-  { email, password }: UserLoginRequestModel
-): Promise<UserLoginResponseModel | UnauthorizedError > {  
-  const user = await userRepository.findByEmail(email);
-  
-  if(user){
-    const isPasswordValid = await cryptoRepository.comparePassword(password, user.password);
-    
-    if(!isPasswordValid) throw createUnauthorizedError("Invalid credentials");
-    return {
-      token : await cryptoRepository.generateJWT(user)
+export async function UserLogin(
+    { users, crypto, tokens }: UserLoginDependencies,
+    { email, password }: UserLoginRequestModel
+): Promise<UserLoginResponseModel> {
+validateLoginData(email, password);
+
+    const existingUser = await users.findByEmail(email);
+    if (!existingUser) {
+      throw createInvalidDataError("Invalid email or password");
     }
-  }
-  throw createUnauthorizedError("Invalid credentials");
+
+    const isPasswordValid = await crypto.comparePasswords(password, existingUser.password);
+    if (!isPasswordValid) {
+    throw createInvalidDataError("Invalid email or password");
+    }
+
+    const token = await tokens.generateToken({
+        id: existingUser.id,
+        role: existingUser.role
+    });
+
+    return {
+        token,
+        user: {
+            id: existingUser.id,
+            email: existingUser.email,
+            name: existingUser.name,
+            role: existingUser.role
+        }
+    };
+}
+
+function validateLoginData(email: string, password: string): InvalidDataError | void {
+    if (!email.trim()) {
+        return createInvalidDataError("Email must not be empty");
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        return createInvalidDataError("Invalid email format");
+    }
+    if (!password.trim()) {
+        return createInvalidDataError("Password must not be empty");
+    }
 }

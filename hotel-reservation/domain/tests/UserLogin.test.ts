@@ -1,71 +1,80 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { login, UserLoginDependencies, UserLoginRequestModel } from '../src/use-cases/user/UserLogin';
-
+import { UserLogin, UserLoginDependencies, UserLoginRequestModel } from '../src/use-cases/user/UserLogin';
 
 describe('login', () => {
-  let userRepository: {
-    findByEmail: (email: string) => Promise<any | null>;
+  let users: { findByEmail: (email: string) => Promise<any | null> };
+  let crypto: {
+    comparePasswords: (plain: string, hashed: string) => Promise<boolean>;
   };
-  let cryptoRepository: {
-    comparePassword: (plain: string, hashed: string) => Promise<boolean>;
-    generateJWT: (user: any) => Promise<string>;
+  let tokens: {
+    generateToken: (payload: any) => Promise<string>;
   };
   let dependencies: UserLoginDependencies;
 
   beforeEach(() => {
-    userRepository = {
+    users = {
       findByEmail: vi.fn(),
     };
-    cryptoRepository = {
-      comparePassword: vi.fn(),
-      generateJWT: vi.fn(),
+    crypto = {
+      comparePasswords: vi.fn(),
     };
-    dependencies = { userRepository, cryptoRepository };
+    tokens = {
+      generateToken: vi.fn(),
+    };
+    dependencies = { users, crypto, tokens };
   });
 
   test('debería retornar token si el login es exitoso', async () => {
-    const user = { id: 'user-1', password: 'hashed-password' };
-    (userRepository.findByEmail as any).mockResolvedValue(user);
-    (cryptoRepository.comparePassword as any).mockResolvedValue(true);
-    (cryptoRepository.generateJWT as any).mockResolvedValue('jwt-token');
+    const user = { id: 'user-1', email: 'test@example.com', password: 'hashed-password', role: 'guest', name: 'Test User' };
+    (users.findByEmail as any).mockResolvedValue(user);
+    (crypto.comparePasswords as any).mockResolvedValue(true);
+    (tokens.generateToken as any).mockResolvedValue('jwt-token');
 
     const request: UserLoginRequestModel = {
       email: 'test@example.com',
       password: 'correct-password',
     };
 
-    const result = await login(dependencies, request);
+    const result = await UserLogin(dependencies, request);
 
-    expect(userRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
-    expect(cryptoRepository.comparePassword).toHaveBeenCalledWith('correct-password', 'hashed-password');
-    expect(cryptoRepository.generateJWT).toHaveBeenCalledWith(user);
-    expect(result).toEqual({ token: 'jwt-token' });
+    expect(users.findByEmail).toHaveBeenCalledWith('test@example.com');
+    expect(crypto.comparePasswords).toHaveBeenCalledWith('correct-password', 'hashed-password');
+    expect(tokens.generateToken).toHaveBeenCalledWith({ id: 'user-1', role: 'guest' });
+    expect(result).toEqual({
+      token: 'jwt-token',
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'guest',
+      },
+    });
   });
 
   test('debería lanzar error si la contraseña es inválida', async () => {
-    const user = { id: 'user-1', password: 'hashed-password' };
-    (userRepository.findByEmail as any).mockResolvedValue(user);
-    (cryptoRepository.comparePassword as any).mockResolvedValue(false);
+    const user = { id: 'user-1', password: 'hashed-password', role: 'guest' };
+    (users.findByEmail as any).mockResolvedValue(user);
+    (crypto.comparePasswords as any).mockResolvedValue(false);
 
     const request: UserLoginRequestModel = {
       email: 'test@example.com',
       password: 'wrong-password',
     };
 
-    await expect(login(dependencies, request)).rejects.toThrow('401 Unauthorized');
-    expect(userRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
-    expect(cryptoRepository.comparePassword).toHaveBeenCalledWith('wrong-password', 'hashed-password');
+    await expect(UserLogin(dependencies, request)).rejects.toThrow('Invalid email or password');
+    expect(users.findByEmail).toHaveBeenCalledWith('test@example.com');
+    expect(crypto.comparePasswords).toHaveBeenCalledWith('wrong-password', 'hashed-password');
   });
 
   test('debería lanzar error si el usuario no existe', async () => {
-    (userRepository.findByEmail as any).mockResolvedValue(null);
+    (users.findByEmail as any).mockResolvedValue(null);
 
     const request: UserLoginRequestModel = {
       email: 'nonexistent@example.com',
       password: 'any-password',
     };
 
-    await expect(login(dependencies, request)).rejects.toThrow('401 Unauthorized');
-    expect(userRepository.findByEmail).toHaveBeenCalledWith('nonexistent@example.com');
+    await expect(UserLogin(dependencies, request)).rejects.toThrow('Invalid email or password');
+    expect(users.findByEmail).toHaveBeenCalledWith('nonexistent@example.com');
   });
 });
