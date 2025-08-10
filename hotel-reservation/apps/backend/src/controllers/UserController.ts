@@ -5,31 +5,32 @@ import { deleteUser } from "../../../../domain/src/use-cases/user/DeleteUser";
 import { Request, Response } from "express";
 import { cryptoService } from "../services/crypto.service";
 import { userService } from "../services/user.service";
-import { 
-     createInvalidDataError, createInternalServerError } from "../../../../domain/src/errors/error";
+import {
+    createInvalidDataError, createInternalServerError
+} from "../../../../domain/src/errors/error";
 
 export function userController() {
     return {
-       
+
         registerNewUser: async (req: Request, res: Response) => {
             try {
-                const {email, password, name } : UserRegisterRequestModel = req.body;
+                const { email, password, name }: UserRegisterRequestModel = req.body;
                 const user = await UserRegister(
                     {
-                        users: userService(), 
+                        users: userService(),
                         crypto: cryptoService()
                     },
-                    {email, password, name });
+                    { email, password, name });
 
                 return res.status(200).json({
                     ok: true,
                     data: user,
                     message: "Usuario registrado con éxito"
                 });
-            } catch (e) {                
+            } catch (e) {
                 const error =
-                    e instanceof 
-                    Error
+                    e instanceof
+                        Error
                         ? e
                         : createInternalServerError(
                             "Ups, hubo un error al registrar el usuario"
@@ -40,20 +41,20 @@ export function userController() {
                 });
             }
         },
-         
+
 
         // Get user data
         findById: async (req: Request, res: Response) => {
             try {
-                const {id} = req.params;
-                const user = await findUserById({userRepository: userService()}, {id});
+                const { id } = req.params;
+                const user = await findUserById({ userRepository: userService() }, { id });
 
                 return res.status(200).json({
                     ok: true,
                     data: user,
                     message: "Perfil de usuario"
                 });
-            } catch (e) {                
+            } catch (e) {
                 const error =
                     e instanceof Error
                         ? e
@@ -75,15 +76,15 @@ export function userController() {
                     data: users.map(user => {
                         return {
                             ...user,
-                            url : `${req.protocol}://${req.get('host')}/users/${user.id}`
+                            url: `${req.protocol}://${req.get('host')}/users/${user.id}`
                         }
                     }),
                     message: "Lista de usuarios"
                 });
             } catch (e) {
                 const error =
-                    e instanceof 
-                    Error
+                    e instanceof
+                        Error
                         ? e
                         : createInternalServerError(
                             "Ups, hubo un error al obtener la lista de usuarios"
@@ -94,7 +95,7 @@ export function userController() {
                 });
             }
         },
-         getUserById: async (req: Request, res: Response) => {
+        getUserById: async (req: Request, res: Response) => {
             try {
                 const { id } = req.params;
                 const user = await findUserById(
@@ -109,8 +110,8 @@ export function userController() {
                 return res.status(200).json({ ok: true, data: user });
             } catch (e) {
                 const error =
-                    e instanceof 
-                    Error
+                    e instanceof
+                        Error
                         ? e
                         : createInternalServerError("Error al obtener usuario");
                 return res.status(error.message).json({ ok: false, message: error.message });
@@ -132,15 +133,15 @@ export function userController() {
                 });
             } catch (e) {
                 const error =
-                    e instanceof 
-                    Error
+                    e instanceof
+                        Error
                         ? e
                         : createInternalServerError("Error al actualizar usuario");
                 return res.status(error.message).json({ ok: false, message: error.message });
             }
         },
 
-   
+
         deleteUser: async (req: Request, res: Response) => {
             try {
                 const { id } = req.params;

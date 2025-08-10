@@ -3,7 +3,7 @@ import {
   addRoomController,
   updateRoomController,
   deleteRoomController,
-} from '../controllers/roomController';
+} from '../../backend/src/controllers/roomController';
 
 const router = Router();
 

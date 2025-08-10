@@ -23,7 +23,7 @@ export const addRoomController = async (req: Request, res: Response) => {
 export const updateRoomController = async (req: Request, res: Response) => {
   try {
     const { id, number, type, pricePerNight, status } = req.body;
-    
+
     const updateData: any = { id };
     if (number) updateData.number = number;
     if (type) updateData.type = type.toLowerCase() as RoomType;
