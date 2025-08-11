@@ -1,16 +1,21 @@
-import { Router, Request, Response } from 'express';
-import { reservationController } from '../controllers/reservationController';
+import { Router } from 'express';
+import { createReservationController } from '../controllers/reservationController';
+import { ReservationService } from '../services/reservationServices';
 
-const router = Router();
+export function createReservationRoutes(deps: {
+  reservationService: ReservationService;
+}) {
+  const router = Router();
+  const reservationController = createReservationController(deps);
 
-// CRUD endpoints
-router.post('/', reservationController.create);
-router.get('/:id', reservationController.findById);
-router.put('/:id', reservationController.update);
-router.delete('/:id', reservationController.delete);
+  // CRUD endpoints
+  router.post('/', reservationController.createReservation);
+  router.get('/:id', reservationController.getReservationById);
+  router.delete('/:id', reservationController.deleteReservation);
+  
+  router.put('/:id/complete', reservationController.completeReservation);
+  router.put('/:id/cancel', reservationController.cancelReservation);
+  router.get('/', reservationController.getAllReservations);
 
-// Operaciones específicas de reservaciones
-router.put('/:id/complete', reservationController.complete);
-router.put('/:id/cancel', reservationController.cancel);
-
-export default router;
+  return router;
+}

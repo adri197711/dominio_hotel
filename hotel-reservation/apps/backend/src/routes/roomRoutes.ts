@@ -1,16 +1,18 @@
 import { Router } from 'express';
-import {
-  addRoomController,
-  updateRoomController,
-  deleteRoomController,
-} from '../../backend/src/controllers/roomController';
+import { createRoomController } from '../controllers/roomController';
+import { RoomService } from '../services/roomServices';
 
-const router = Router();
+export function createRoomRoutes(deps: {
+  roomService: RoomService;
+}) {
+  const router = Router();
+  const roomController = createRoomController(deps);
 
-router.post('/', addRoomController);
+  router.post('/', roomController.createRoom);
+  router.get('/', roomController.getAllRooms);
+  router.get('/:id', roomController.getRoomById);
+  router.put('/:id', roomController.updateRoom);
+  router.delete('/:id', roomController.deleteRoom);
 
-router.put('/', updateRoomController);
-
-router.delete('/', deleteRoomController);
-
-export default router;
+  return router;
+}
