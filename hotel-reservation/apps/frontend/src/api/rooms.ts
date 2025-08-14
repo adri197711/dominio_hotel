@@ -1,15 +1,28 @@
-
-import { mockRoomAvailable, mockRoomBooked } from '../stories/fixtures';
-import { Room } from '../types/Room';
+import { api } from "./axios";
+import { Room } from "../types/Room";
 
 export const RoomsService = {
-  getAll: async (): Promise<Room[]> => {
-    // Retorna mocks para desarrollo
-    return [mockRoomAvailable, mockRoomBooked];
+  async getAll(): Promise<Room[]> {
+    const res = await api.get<Room[]>("/rooms");
+    return res.data;
   },
-  getById: async (id: string): Promise<Room | null> => {
-    if (id === mockRoomAvailable.id) return mockRoomAvailable;
-    if (id === mockRoomBooked.id) return mockRoomBooked;
-    return null;
-  }
+
+  async getById(id: string): Promise<Room> {
+    const res = await api.get<Room>(`/rooms/${id}`);
+    return res.data;
+  },
+
+  async create(room: Omit<Room, "id">): Promise<Room> {
+    const res = await api.post<Room>("/rooms", room);
+    return res.data;
+  },
+
+  async update(id: string, room: Partial<Room>): Promise<Room> {
+    const res = await api.put<Room>(`/rooms/${id}`, room);
+    return res.data;
+  },
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`/rooms/${id}`);
+  },
 };

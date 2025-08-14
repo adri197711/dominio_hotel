@@ -1,4 +1,4 @@
-import { Room } from "../types/room";
+import { Room } from "../types/Room";
 
 interface RoomCardProps {
   room: Room;

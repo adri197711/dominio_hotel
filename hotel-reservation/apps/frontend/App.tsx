@@ -11,9 +11,9 @@ export function App() {
         <nav className="bg-blue-600 text-white p-4 flex justify-between">
           <h1 className="font-bold text-lg">Hotel Management</h1>
           <div className="space-x-4">
-            <Link to="/users" className="hover:underline">Users</Link>
-            <Link to="/rooms" className="hover:underline">Rooms</Link>
-            <Link to="/reservations" className="hover:underline">Reservations</Link>
+            <Link to="/users" className="hover:underline"> Users </Link>
+            <Link to="/rooms" className="hover:underline"> Rooms </Link>
+            <Link to="/reservations" className="hover:underline"> Reservations </Link>
           </div>
         </nav>
 

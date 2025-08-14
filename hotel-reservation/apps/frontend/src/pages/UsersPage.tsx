@@ -1,19 +1,40 @@
-// UsersPage.tsx
 import { useEffect, useState } from "react";
-import { UserCard } from "../components/UserCard";
 import { UsersService } from "../api/users";
+import { User } from "../types/User";
+import { Spinner } from "../components/Spinner";
+import { ErrorMessage } from "../components/ErrorMessage";
 
 export function UsersPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadUsers = () => {
+    setLoading(true);
+    setError(null);
+    UsersService.getAll()
+      .then(data => setUsers(data))
+      .catch(() => setError("No se pudieron cargar los usuarios"))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    UsersService.getAll().then(setUsers);
+    loadUsers();
   }, []);
+
+  if (loading) return <Spinner />;
+  if (error) return <ErrorMessage message={error} onRetry={loadUsers} />;
 
   return (
     <div>
-      <h1>Usuarios</h1>
-      {users.map(user => <UserCard key={user.id} user={user} />)}
+      <h1 className="text-2xl font-bold mb-4">Usuarios</h1>
+      <ul>
+        {users.map(user => (
+          <li key={user.id} className="border-b py-2">
+            {user.name} — {user.email}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
