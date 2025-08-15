@@ -2,10 +2,11 @@ import { api } from "./axios";
 import { User } from "../types/User";
 
 export const UsersService = {
-  async getAll(): Promise<User[]> {
+  getAll: async (): Promise<User[]> => {
     const res = await api.get<User[]>("/users");
     return res.data;
   },
+
 
   async getById(id: string): Promise<User> {
     const res = await api.get<User>(`/users/${id}`);

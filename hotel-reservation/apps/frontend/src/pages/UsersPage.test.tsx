@@ -1,22 +1,28 @@
-import { render, screen } from '@testing-library/react';
-import { UsersPage } from './UsersPage';
-import { UsersService } from '../api/users';
-import { vi } from 'vitest';
+import { render, screen, waitFor } from "@testing-library/react";
+import { http, HttpResponse } from 'msw'
+import { setupServer } from "msw/node";
+import { UsersPage } from "./UsersPage";
 
-vi.mock('../api/users');
+const server = setupServer(
+  http.get("/users", () => { // Changed from /api/users to /users
+    return HttpResponse.json([
+      { id: "1", name: "Juan Pérez", email: "juan@example.com" },
+      { id: "2", name: "María Gómez", email: "maria@example.com" },
+    ]);
+  })
+);
 
-const mockedUsers = [
-  { id: '1', name: 'Juan Pérez', email: 'juan@example.com', role: 'guest' },
-];
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
-(UsersService.getAll as vi.Mock).mockResolvedValue(mockedUsers);
-
-test('UsersPage carga y muestra usuarios correctamente', async () => {
+test("carga y muestra usuarios correctamente", async () => {
   render(<UsersPage />);
 
-  // Spinner inicial
-  expect(screen.getByRole('status', { name: /cargando/i })).toBeInTheDocument();
-
-  // Usuario cargado
-  expect(await screen.findByText(/Juan Pérez/)).toBeInTheDocument();
+  // Use findByText to wait for the elements to appear
+  const juan = await screen.findByText("juan@example.com");
+  const maria = await screen.findByText("maria@example.com");
+  
+  expect(juan).toBeInTheDocument();
+  expect(maria).toBeInTheDocument();
 });

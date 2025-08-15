@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { UsersService } from "../api/users";
+import { AuthService } from '../api/AuthService';
+import { UsersService } from "../api/UsersService";
 import { User } from "../types/User";
 import { Spinner } from "../components/Spinner";
 import { ErrorMessage } from "../components/ErrorMessage";
@@ -12,6 +13,13 @@ export function UsersPage() {
   const loadUsers = () => {
     setLoading(true);
     setError(null);
+
+    if (!AuthService.isAuthenticated()) {
+      setError("No autorizado");
+      setLoading(false);
+      return;
+    }
+
     UsersService.getAll()
       .then(data => setUsers(data))
       .catch(() => setError("No se pudieron cargar los usuarios"))
