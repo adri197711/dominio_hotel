@@ -1,15 +1,12 @@
-import api from './axios';
-import { User } from '../types/User';
+import { UsersService } from "./UsersService";
+import axios from "axios";
 
-export const UsersService = {
-  getAll: async (): Promise<User[]> => {
-    const response = await api.get<User[]>('/users');
-    return response.data;
-  },
+vi.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-  getById: async (id: string): Promise<User> => {
-    const response = await api.get<User>(`/users/${id}`);
-    return response.data;
-  },
-
-};
+test("getAll obtiene lista de usuarios", async () => {
+  mockedAxios.get.mockResolvedValueOnce({ data: [{ id: "1", name: "Juan" }] });
+  const result = await UsersService.getAll();
+  expect(result).toEqual([{ id: "1", name: "Juan" }]);
+  expect(mockedAxios.get).toHaveBeenCalledWith("/api/users");
+});

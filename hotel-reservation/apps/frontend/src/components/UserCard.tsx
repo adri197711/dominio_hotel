@@ -1,4 +1,4 @@
-import { User } from "../types/user";
+import { User } from "../types/User";
 
 interface Props {
   user: User;
@@ -6,11 +6,11 @@ interface Props {
 
 export function UserCard({ user }: Props) {
   return (
-    <div style={{ border: "1px solid #ccc", padding: "1rem", borderRadius: "8px" }}>
-      <h3>{user.name}</h3>
-      <p>Email: {user.email}</p>
-      <p>Role: {user.role}</p>
-      {user.createdAt && <p>Created: {user.createdAt.toLocaleDateString()}</p>}
+<div>
+      <div>{user.name}</div>
+      <div>Email: {user.email}</div>
+      <div>Role: {user.role}</div>
+      {user.createdAt && <div>Created: {user.createdAt.toLocaleDateString()}</div>}
     </div>
   );
 }

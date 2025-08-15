@@ -3,27 +3,34 @@ import { User } from "../types/User";
 
 export const UsersService = {
   getAll: async (): Promise<User[]> => {
-    const res = await api.get<User[]>("/users");
+    const res = await api.get("/users");
     return res.data;
   },
 
-
-  async getById(id: string): Promise<User> {
-    const res = await api.get<User>(`/users/${id}`);
+  getById: async (id: string): Promise<User> => {
+    const res = await api.get(`/users/${id}`);
     return res.data;
   },
 
-  async create(user: Omit<User, "id">): Promise<User> {
-    const res = await api.post<User>("/users", user);
+  create: async (user: Omit<User, 'id'>): Promise<User> => {
+    const res = await api.post("/users", user);
     return res.data;
   },
 
-  async update(id: string, user: Partial<User>): Promise<User> {
-    const res = await api.put<User>(`/users/${id}`, user);
+  update: async (id: string, user: Partial<User>): Promise<User> => {
+    const res = await api.put(`/users/${id}`, user);
     return res.data;
   },
 
-  async delete(id: string): Promise<void> {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/users/${id}`);
   },
+};
+export const AuthService = {
+  isAuthenticated: (): boolean => {
+    return false;
+  },
+  getToken: (): string | null => {
+    return null;
+  }
 };
