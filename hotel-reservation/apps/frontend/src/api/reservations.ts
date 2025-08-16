@@ -1,5 +1,5 @@
 import { api } from "./axios";
-import { Reservation } from "../types/reservation";
+import { Reservation } from "../types/Reservation";
 
 export const ReservationsService = {
   async getAll(): Promise<Reservation[]> {
