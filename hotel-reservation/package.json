@@ -2,6 +2,10 @@
   "name": "hotel-reservation-domain",
   "version": "1.0.0",
   "main": "src/index.ts",
+  "workspaces": [
+    "apps/*",
+    "domain"
+  ],
   "scripts": {
     "test": "vitest"
   },

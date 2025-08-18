@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-
 import {
   UserRegister,
   findUsers,
@@ -7,7 +6,7 @@ import {
   updateUser,
   deleteUser,
   UserLogin,
-} from '../../../../../domain/src/use-cases/user'; 
+} from  '../../../../../domain/src/use-cases/user'; 
 import { createInvalidDataError } from '../../../../../domain/src/errors/error';
 
 const mockUserRepo = {
@@ -68,6 +67,19 @@ describe('findUsers', () => {
     expect(users).toHaveLength(1);
   });
 });
+describe('deleteUser', () => {
+  it('should delete existing user', async () => {
+    mockUserRepo.findById.mockResolvedValue({ id: '1' });
+    mockUserRepo.delete.mockResolvedValue();
+
+    await expect(deleteUser({ userRepository: mockUserRepo }, { id: '1' })).resolves.toBeUndefined();
+  });
+
+  it('should throw if user not found', async () => {
+    mockUserRepo.findById.mockResolvedValue(null);
+    await expect(deleteUser({ userRepository: mockUserRepo }, { id: '2' })).rejects.toThrow();
+  });
+});
 
 describe('findUserById', () => {
   it('should find user by id', async () => {
@@ -98,19 +110,6 @@ describe('updateUser', () => {
   });
 });
 
-describe('deleteUser', () => {
-  it('should delete existing user', async () => {
-    mockUserRepo.findById.mockResolvedValue({ id: '1' });
-    mockUserRepo.delete.mockResolvedValue();
-
-    await expect(deleteUser({ userRepository: mockUserRepo }, { id: '1' })).resolves.toBeUndefined();
-  });
-
-  it('should throw if user not found', async () => {
-    mockUserRepo.findById.mockResolvedValue(null);
-    await expect(deleteUser({ userRepository: mockUserRepo }, { id: '2' })).rejects.toThrow();
-  });
-});
 
 describe('UserLogin', () => {
   it('should login successfully', async () => {
