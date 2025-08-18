@@ -1,30 +1,16 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "composite": true,
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-
-    /* Imports absolutos */
-    "baseUrl": ".",
-    "paths": {
-      "@domain/*": ["domain/src/*"],
-      "@services/*": ["apps/backend/src/services/*"],
-      "@controllers/*": ["apps/backend/src/controllers/*"]
-    }
-  },
-  "references": [
-    { "path": "./domain" },
-    { "path": "./apps/backend" }
-  ]
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "incremental": true
+  }
 }

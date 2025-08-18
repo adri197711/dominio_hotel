@@ -1,20 +1,91 @@
 version: "3.9"
 
 services:
+  db:
+    image: mysql:8.0
+    container_name: hotel-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
-      context: .            
+      context: .
       dockerfile: apps/backend/Dockerfile
+      target: ${BACKEND_TARGET}
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASS: ${MYSQL_PASSWORD}
+      CHOKIDAR_USEPOLLING: "true"
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
-      - "3000:3000"
+      - "4000:4000"
+    networks:
+      - app-net
     volumes:
-      - .:/usr/src/app      
+      - .:/usr/src/app
+      - backend-node:/usr/src/app/apps/backend/node_modules
+      - domain-node:/usr/src/app/domain/node_modules
+      - root-node:/usr/src/app/node_modules
 
   frontend:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+      target: ${FRONTEND_TARGET}
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      VITE_API_URL: http://backend:4000
+    depends_on:
+      - backend
     ports:
       - "4200:4200"
+    networks:
+      - app-net
     volumes:
-      - .:/usr/src/app      
+      - .:/usr/src/app
+      - frontend-node:/usr/src/app/apps/frontend/node_modules
+      - root-node:/usr/src/app/node_modules
+      - domain-node:/usr/src/app/domain/node_modules
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      target: nginx
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+
+volumes:
+  db-data:
+  root-node:
+  backend-node:
+  frontend-node:
+  domain-node:
