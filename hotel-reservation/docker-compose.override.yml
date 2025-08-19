@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  db:
+    healthcheck:
+      test: ["CMD-SHELL", git status"mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/backend:/usr/src/app/apps/backend
+      - backend-node:/usr/src/app/apps/backend/node_modules
+      - domain-node:/usr/src/app/domain/node_modules
+      - root-node:/usr/src/app/node_modules
+
+  frontend:
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/frontend:/usr/src/app/apps/frontend
+      - frontend-node:/usr/src/app/apps/frontend/node_modules
+      - domain-node:/usr/src/app/domain/node_modules
+      - root-node:/usr/src/app/node_modules

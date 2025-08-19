@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.8"
 
 services:
   db:
@@ -11,22 +11,22 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      - "3307:3306" 
     volumes:
       - db-data:/var/lib/mysql
     networks:
       - app-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-      target: ${BACKEND_TARGET}
+      target: ${BACKEND_TARGET}  
     environment:
       NODE_ENV: ${NODE_ENV}
       DB_HOST: db
@@ -52,7 +52,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-      target: ${FRONTEND_TARGET}
+      target: ${FRONTEND_TARGET}  # "dev" para desarrollo
     environment:
       NODE_ENV: ${NODE_ENV}
       VITE_API_URL: http://backend:4000
@@ -63,16 +63,17 @@ services:
     networks:
       - app-net
     volumes:
-      - .:/usr/src/app
+      - ./apps/frontend:/usr/src/app/apps/frontend
       - frontend-node:/usr/src/app/apps/frontend/node_modules
-      - root-node:/usr/src/app/node_modules
       - domain-node:/usr/src/app/domain/node_modules
+      - root-node:/usr/src/app/node_modules
+
 
   web:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-      target: nginx
+      target: nginx  # Producción
     depends_on:
       - backend
     ports:
@@ -80,12 +81,12 @@ services:
     networks:
       - app-net
 
-networks:
-  app-net:
-
 volumes:
   db-data:
   root-node:
   backend-node:
   frontend-node:
   domain-node:
+
+networks:
+  app-net:
