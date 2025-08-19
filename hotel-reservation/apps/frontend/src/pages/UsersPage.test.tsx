@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { UsersPage } from "./UsersPage";
 import { AuthService, UsersService } from "../api/users";
 import { describe, test, expect, beforeEach, vi } from "vitest";
+// apps/frontend/src/setupTests.ts
+import "@testing-library/jest-dom";
 
 vi.mock("../api/users", () => ({
   ...vi.importActual("../api/users"),

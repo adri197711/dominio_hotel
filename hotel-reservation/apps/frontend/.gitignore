@@ -8,9 +8,15 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-dist-ssr
+**/node_modules/
 *.local
+
+# Build / Dist folders
+dist/
+dist-ssr
+build/
+**/dist/
+**/build/
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +31,39 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# TypeScript build info
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Compiled JavaScript
+**/*.js
+**/*.js.map
+
+# TypeScript declaration maps
+**/*.d.ts.map
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+**/Dockerfile.*.backup
+
+# Frontend artifacts
+**/public/build/
+**/frontend/dist/
+**/frontend/build/
+
+# VSCode
+.vscode/
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Tests compiled
+**/tests/**/*.js
+**/tests/**/*.js.map
