@@ -49,6 +49,7 @@ services:
       - root-node:/usr/src/app/node_modules
 
   frontend:
+  profiles: ["dev"]
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
@@ -70,6 +71,7 @@ services:
 
 
   web:
+  profiles: ["prod"]
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
