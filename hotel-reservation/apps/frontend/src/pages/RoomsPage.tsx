@@ -29,11 +29,17 @@ export function RoomsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Habitaciones</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {rooms.map((room) => (
-          <RoomCard key={room.id} room={room} />
-        ))}
-      </div>
+      { }
+      {rooms.length === 0 ? (
+        <p className="text-gray-500">No hay habitaciones disponibles</p>
+      ) : (
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {rooms.map((room) => (
+            <RoomCard key={room.id} room={room} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

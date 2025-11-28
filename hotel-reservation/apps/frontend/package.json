@@ -12,13 +12,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test": "vitest run",
-    "test:watch": "vitest",
+   "test": "vitest run --workspace vitest.workspace.ts",
+  "test:watch": "vitest --workspace vitest.workspace.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "axios": "^1.11.0",
+    "axios": "^1.13.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.8.0"

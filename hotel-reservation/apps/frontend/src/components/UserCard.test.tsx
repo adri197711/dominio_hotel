@@ -1,9 +1,11 @@
+import "@testing-library/jest-dom"
+import { describe, test, expect } from "vitest";
 import { render, screen } from '@testing-library/react';
 import { UserCard } from './UserCard';
 import { User } from '../types/User';
 
 describe('UserCard', () => {
-  it('muestra correctamente el nombre y email del usuario', () => {
+  test('muestra correctamente el nombre y email del usuario', () => {
     const user: User = {
       id: '1',
       name: 'Juan',

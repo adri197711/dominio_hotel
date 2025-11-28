@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from 'sequelize/lib/sequelize';
+import { sequelize } from '../connection';
 
 interface UserAttributes {
   id: number;
@@ -12,6 +12,7 @@ interface UserAttributes {
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'validated' | 'locked'> {}
+
 
 export class UserModel extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
@@ -100,4 +101,4 @@ RoleModel.init(
 );
 
 UserModel.belongsTo(RoleModel, { as: 'role', foreignKey: 'rolId' });
-RoleModel.hasMany(UserModel, { foreignKey: 'rolId' });
+RoleModel.hasMany(UserModel, { as: 'users', foreignKey: 'rolId' });

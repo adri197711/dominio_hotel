@@ -1,14 +1,29 @@
-import { Dialect, Sequelize } from 'sequelize';
+import { Sequelize, Dialect } from 'sequelize';
 import env from '../env';
 
-const {db : {name,username,password,host, dialect, port, storage, logging}} = env;
+const {db } = env;
+const {name,username,password,host, dialect, port, storage, logging} = db;
 
-let sequelizeConnection: Sequelize = new Sequelize(name, username, password, {
+if (!name || !username || !host) {
+  throw new Error('Variables de entorno de la base de datos (name, username, host) no están definidas.');
+}
+
+const enableLogging = logging === 'true';
+
+let sequelize = new Sequelize(name, username, password, {
   host,
   dialect: dialect as Dialect,
-  port : +port,
+  port : parseInt(port , 10),
   storage,
-  logging: false
+  logging: enableLogging ? console.log : false,
 });
-
-export default sequelizeConnection;
+// 5. MEJORA: Añadir un bloque para autenticar la conexión al inicio
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Conexión a la base de datos establecida exitosamente.');
+  } catch (error) {
+    console.error('❌ No se pudo conectar a la base de datos:', error);
+  }
+})();
+export { sequelize };

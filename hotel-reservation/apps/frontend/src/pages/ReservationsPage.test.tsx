@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ReservationsPage } from "./ReservationsPage";
 import { ReservationsService } from "../api/reservations";

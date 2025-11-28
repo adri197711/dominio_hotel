@@ -1,12 +1,15 @@
 import { sequelize } from './connection';
-import { UserModel, RoleModel } from '../src/database/models/user.models';
+import { UserModel, RoleModel } from './models/user.models';
 
 async function initDatabase() {
   try {
-    // Sincroniza modelos con la base de datos
-    await sequelize.sync({ force: true }); 
-    // force:true elimina y crea tablas desde cero, útil en desarrollo
+      await sequelize.sync({ alter: true }); 
+     console.log('✅ Modelos sincronizados con la base de datos.');
     
+      const rolesCount = await RoleModel.count();
+    if (rolesCount === 0) {
+      console.log('⏳ Base de datos vacía, creando datos iniciales...');
+
     // Crear roles iniciales
     const adminRole = await RoleModel.create({ name: 'admin' });
     const userRole = await RoleModel.create({ name: 'user' });

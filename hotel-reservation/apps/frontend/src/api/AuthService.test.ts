@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { AuthService } from "../api/users"; // 👈 mismo archivo donde lo exportaste
 
 describe("AuthService", () => {
@@ -5,7 +6,9 @@ describe("AuthService", () => {
     expect(AuthService.isAuthenticated()).toBe(false);
   });
 
+
   test("getToken devuelve null por defecto", () => {
     expect(AuthService.getToken()).toBeNull();
   });
-});
+
+  });

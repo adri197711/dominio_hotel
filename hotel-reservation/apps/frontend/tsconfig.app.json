@@ -1,6 +1,7 @@
 {
  
   "compilerOptions": {
+     "types": ["vitest/globals", "vite/client"],
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
